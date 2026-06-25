@@ -30,16 +30,16 @@ jobs:
     steps:
       - id: calc
         run: |
+          RAW=""
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "tag=${{ github.event.inputs.ref_name }}" >> $GITHUB_OUTPUT
-
+            RAW="${{ github.event.inputs.ref_name }}"
           elif [ "${{ github.event_name }}" = "release" ]; then
-            echo "tag=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
-
+            RAW="${{ github.event.release.tag_name }}"
           else
-            BRANCH=${GITHUB_REF#refs/heads/}
-            echo "tag=$BRANCH" >> $GITHUB_OUTPUT
+            RAW=${GITHUB_REF#refs/heads/}
           fi
+          CLEAN=$(echo "$RAW" | sed 's#refs/tags/##g')
+          echo "tag=$CLEAN" >> $GITHUB_OUTPUT
 
 
   # =====================================================
