@@ -29,16 +29,16 @@ jobs:
     steps:
       - id: calc
         run: |
-          RAW=""
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            RAW="${{ github.event.inputs.ref_name }}"
+            echo "tag=${{ github.event.inputs.ref_name }}" >> $GITHUB_OUTPUT
+
           elif [ "${{ github.event_name }}" = "release" ]; then
-            RAW="${{ github.event.release.tag_name }}"
+            echo "tag=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+
           else
-            RAW=${GITHUB_REF#refs/heads/}
+            BRANCH=${GITHUB_REF#refs/heads/}
+            echo "tag=$BRANCH" >> $GITHUB_OUTPUT
           fi
-          CLEAN=$(echo "$RAW" | sed 's#refs/tags/##g')
-          echo "tag=$CLEAN" >> $GITHUB_OUTPUT
 
 
   # =====================================================
@@ -115,6 +115,8 @@ jobs:
           file: ./source/Dockerfile
           platforms: linux/arm64
           push: true
+          build-args: |
+            BUILDPLATFORM=linux/arm64
           tags: |
             ${{ env.REPO_DOCKERHUB }}:${{ needs.set-tag.outputs.tag }}-arm64
             ${{ env.REPO_GHCR }}:${{ needs.set-tag.outputs.tag }}-arm64
@@ -162,6 +164,8 @@ jobs:
           file: ./source/Dockerfile-ol8
           platforms: linux/arm64
           push: true
+          build-args: |
+            BUILDPLATFORM=linux/arm64
           tags: |
             ${{ env.REPO_DOCKERHUB }}:${{ needs.set-tag.outputs.tag }}-arm64-ol8
             ${{ env.REPO_GHCR }}:${{ needs.set-tag.outputs.tag }}-arm64-ol8
